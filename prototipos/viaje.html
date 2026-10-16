@@ -231,6 +231,16 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 .pie-marca { font: 600 1.5rem/1 var(--f-display); color: var(--marfil); display: block; margin-bottom: 10px; }
 .pie-in a { color: var(--marfil); }
 @media (max-width: 700px) { .pie-in { grid-template-columns: 1fr; } }
+
+/* Modo viaje: un gesto = una escena. Los textos de las primeras escenas se fijan y aparecen según la escena activa */
+.modo-viaje .fija .caja { position: fixed; top: 0; bottom: 0; left: max(20px, env(safe-area-inset-left, 0px)); right: max(20px, env(safe-area-inset-right, 0px)); width: auto; max-width: 1180px; margin: 0 auto; align-content: center; transition: opacity .9s ease, transform .9s cubic-bezier(.2,.7,.2,1); }
+.modo-viaje .fija:not(.activa) .caja { opacity: 0 !important; transform: translateY(24px) !important; pointer-events: none; }
+.modo-viaje .t-intro .caja { padding-block: 16vh 3vh; }
+.modo-viaje .t-plato .caja { padding-block: 12vh; }
+.modo-viaje .ruta li { cursor: pointer; pointer-events: auto; }
+.modo-viaje .ruta li:hover { color: var(--marfil); }
+.modo-viaje .ruta li:hover span { opacity: 1; }
+@media (max-width: 860px) { .modo-viaje .t-plato .caja { align-content: end; padding-block: 0 14vh; } }
 .sin-webgl #escena { display: none; }
 .sin-webgl body, .sin-webgl { background: radial-gradient(80% 60% at 50% 40%, #1d2a20, var(--noche)); }
 @media (prefers-reduced-motion: reduce) { .desliza i, .js .logo-gr > * { animation: none; } .rev { transition: none; } }
@@ -256,7 +266,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 <a class="btn btn--oro saltar" href="#cotizar">Ir al cotizador →</a>
 
 <main id="inicio">
-  <section class="tramo t-intro" aria-label="Maison Gourmet">
+  <section class="tramo fija t-intro" aria-label="Maison Gourmet">
     <div class="caja">
       <div class="logo-gr" role="img" aria-label="Maison Gourmet, banquetes y eventos">
         <span class="mono" aria-hidden="true">Bogotá</span>
@@ -268,7 +278,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     </div>
   </section>
 
-  <section class="tramo t-cocina lado-d">
+  <section class="tramo fija t-cocina lado-d">
     <div class="caja sombra rev">
       <p class="eyebrow">Escena 1 · La cocina</p>
       <h2 class="grande">Todo empieza<br>en <em>nuestra cocina</em></h2>
@@ -276,7 +286,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     </div>
   </section>
 
-  <section class="tramo t-ingred">
+  <section class="tramo fija t-ingred">
     <div class="caja sombra rev">
       <p class="eyebrow">Ingredientes de temporada</p>
       <h2 class="grande">Elegidos <em>uno a uno</em></h2>
@@ -284,14 +294,14 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     </div>
   </section>
 
-  <section class="tramo t-espiral lado-d">
+  <section class="tramo fija t-espiral lado-d">
     <div class="caja sombra rev">
       <p class="eyebrow">Escena 2 · El emplatado</p>
       <h2 class="grande">Y se convierten<br>en <em>tu menú</em></h2>
     </div>
   </section>
 
-  <section class="tramo t-plato">
+  <section class="tramo fija t-plato">
     <div class="caja">
       <div class="hero sombra rev">
         <p class="eyebrow">Cocina gourmet · Producción completa</p>
@@ -1460,6 +1470,65 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
   let mx = 0, my = 0, cx = 0, cy = 0;
   addEventListener("pointermove", e => { mx = e.clientX / innerWidth - 0.5; my = e.clientY / innerHeight - 0.5; }, { passive: true });
 
+
+  // ================= Modo viaje: un gesto lleva a la siguiente escena =================
+  document.documentElement.classList.add("modo-viaje");
+  const fijas = [...document.querySelectorAll(".fija")];
+  const paradas = () => {
+    const ih = innerHeight, M = mesaEl.offsetTop / ih, Bg = bogEl.offsetTop / ih, Q = cotEl.offsetTop / ih;
+    return [0, 2.0, 3.6, 6.0, M + 3.0, Bg + 2.0, Q + 0.1];
+  };
+  const PARADA_DE_ESCENA = [0, 1, 3, 4, 5, 6]; // índice de la ruta lateral → parada
+  let viajando = false, enfriar = 0;
+  const actual = () => { const y = scrollY / innerHeight, p = paradas(); let k = 0; p.forEach((v, i) => { if (Math.abs(v - y) < Math.abs(p[k] - y)) k = i; }); return k; };
+  function irAParada(i) {
+    const p = paradas(); i = Math.max(0, Math.min(p.length - 1, i));
+    const y0 = scrollY, y1 = p[i] * innerHeight, dist = Math.abs(y1 - y0) / innerHeight;
+    if (Math.abs(y1 - y0) < 2) return;
+    const dur = reducir ? 300 : Math.min(4800, Math.max(1500, dist * 820));
+    const t0v = performance.now(); viajando = true;
+    const paso = now => {
+      const k = Math.min(1, (now - t0v) / dur), e = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+      scrollTo({ top: y0 + (y1 - y0) * e, behavior: "instant" });
+      if (k < 1) requestAnimationFrame(paso); else { viajando = false; enfriar = performance.now() + 650; }
+    };
+    requestAnimationFrame(paso);
+  }
+  // ¿El gesto pertenece al viaje? (antes del cotizador, o en su tope subiendo)
+  const enViaje = dir => { const top = cotEl.offsetTop + innerHeight * 0.1; return scrollY < top - 4 || (dir < 0 && scrollY <= top + 4); };
+  function gesto(dir) {
+    if (viajando || performance.now() < enfriar) return;
+    irAParada(actual() + dir);
+  }
+  addEventListener("wheel", e => {
+    const dir = Math.sign(e.deltaY); if (!dir || !enViaje(dir)) return;
+    e.preventDefault();
+    if (Math.abs(e.deltaY) > 3) gesto(dir);
+  }, { passive: false });
+  let ty = null;
+  addEventListener("touchstart", e => { ty = e.touches[0].clientY; }, { passive: true });
+  addEventListener("touchmove", e => {
+    if (ty === null) return;
+    const dir = Math.sign(ty - e.touches[0].clientY);
+    if (dir && enViaje(dir) && !e.target.closest(".t-menu .form-caja")) e.preventDefault();
+  }, { passive: false });
+  addEventListener("touchend", e => {
+    if (ty === null) return;
+    const dy = ty - e.changedTouches[0].clientY, dir = Math.sign(dy); ty = null;
+    if (Math.abs(dy) > 35 && enViaje(dir)) gesto(dir);
+  }, { passive: true });
+  addEventListener("keydown", e => {
+    if (e.target.closest("input, select, textarea")) return;
+    const dir = ["ArrowDown", "PageDown", " "].includes(e.key) ? 1 : ["ArrowUp", "PageUp"].includes(e.key) ? -1 : 0;
+    if (!dir || !enViaje(dir)) return;
+    e.preventDefault(); gesto(dir);
+  });
+  document.querySelectorAll(".ruta li").forEach((li, i) => li.addEventListener("click", () => irAParada(PARADA_DE_ESCENA[i])));
+  document.querySelectorAll('a[href="#cotizar"]').forEach(a => a.addEventListener("click", e => { e.preventDefault(); irAParada(6); }));
+  const textoActivo = y => { // qué texto fijo se ve según el avance
+    const M = mesaEl.offsetTop / innerHeight;
+    return y < 0.7 ? 0 : y < 1.3 ? -1 : y < 2.9 ? 1 : y < 4.4 ? 2 : y < 5.5 ? 3 : y < M - 0.4 ? 4 : -1;
+  };
   const ruta = [...document.querySelectorAll(".ruta li")];
   const marca = $("#marca");
   // Morph del plato: las partículas suben, giran y caen en el plato nuevo
@@ -1495,7 +1564,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     fuegoU.uTime.value = t;
     if (!reducir) fuegoU.uIgn.value = Math.min(1, 0.08 + t / 1.4);
 
-    prog += (objetivo - prog) * (reducir ? 1 : 0.075);
+    prog += (objetivo - prog) * (reducir || viajando ? 0.35 : 0.075);
     // Mapa en alturas de pantalla: fuego · chispas→ingredientes · vuelo · espiral · plato · mesa
     const M = mesaEl.offsetTop / innerHeight;
     fuegoU.uFire.value = 1 - seg(prog, 0.33, 1.34);
@@ -1520,6 +1589,8 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     const escena = prog < 0.67 ? 0 : prog < 4.42 ? 1 : prog < M - 0.4 ? 2 : prog < Bg - 0.5 ? 3 : prog < Q - 0.75 ? 4 : 5;
     ruta.forEach((li, i) => li.classList.toggle("on", i === escena));
     marca.classList.toggle("ver", prog > 0.4);
+    const ta = textoActivo(prog);
+    fijas.forEach((f, i) => f.classList.toggle("activa", i === ta));
 
     cx += (mx * 1.6 - cx) * 0.04; cy += (-my * 1.0 - cy) * 0.04;
     const vuelo = Math.sin(seg(prog, 1.88, 4.69) * Math.PI);
