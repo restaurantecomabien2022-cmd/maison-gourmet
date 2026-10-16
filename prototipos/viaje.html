@@ -242,6 +242,19 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 .modo-viaje .ruta li:hover { color: var(--marfil); }
 .modo-viaje .ruta li:hover span { opacity: 1; }
 @media (max-width: 860px) { .modo-viaje .t-plato .caja { align-content: end; padding-block: 0 14vh; } }
+/* Flechas para avanzar o volver de escena */
+.flechas { position: fixed; z-index: 5; left: 50%; transform: translateX(-50%); bottom: calc(22px + env(safe-area-inset-bottom, 0px)); display: flex; gap: 10px; }
+.flechas[hidden], .flecha-nav[hidden] { display: none; }
+.flecha-nav { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; cursor: pointer; color: var(--marfil); background: rgba(10,14,11,.45); backdrop-filter: blur(6px); border: 1px solid rgba(244,238,226,.35); transition: border-color .25s, color .25s, background .25s, transform .25s; }
+.flecha-nav svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.flecha-nav:hover { border-color: var(--oro); color: var(--oro); }
+.flecha-nav--abajo { background: var(--oro); color: var(--noche); border-color: var(--oro); animation: latido 2.4s ease-in-out infinite; }
+.flecha-nav--abajo:hover { background: var(--marfil); border-color: var(--marfil); color: var(--noche); }
+.flecha-nav:disabled { opacity: .45; cursor: default; animation: none; }
+@keyframes latido { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
+@media (prefers-reduced-motion: reduce) { .flecha-nav--abajo { animation: none; } }
+@media (max-width: 860px) { .flechas { left: calc(20px + env(safe-area-inset-left, 0px)); transform: none; } .modo-viaje .t-espiral .caja, .modo-viaje .t-cocina .caja, .modo-viaje .t-ingred .caja { align-content: end; padding-bottom: 16vh; } }
+@media (max-width: 560px) { .flecha-nav { width: 46px; height: 46px; } .saltar { padding: 0 16px; min-height: 42px; font-size: 0.82rem; } }
 .sin-webgl #escena { display: none; }
 .sin-webgl body, .sin-webgl { background: radial-gradient(80% 60% at 50% 40%, #1d2a20, var(--noche)); }
 @media (prefers-reduced-motion: reduce) { .desliza i, .js .logo-gr > * { animation: none; } .rev { transition: none; } }
@@ -265,6 +278,10 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 </ol>
 
 <a class="btn btn--oro saltar" href="#cotizar">Ir al cotizador →</a>
+<div class="flechas" id="flechas" hidden>
+  <button type="button" class="flecha-nav" id="fl-arriba" aria-label="Escena anterior" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg></button>
+  <button type="button" class="flecha-nav flecha-nav--abajo" id="fl-abajo" aria-label="Siguiente escena"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+</div>
 
 <main id="inicio">
   <section class="tramo fija t-intro" aria-label="Maison Gourmet">
@@ -1515,6 +1532,10 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     e.preventDefault(); gesto(dir);
   });
   document.querySelectorAll(".ruta li").forEach((li, i) => li.addEventListener("click", () => irAParada(PARADA_DE_ESCENA[i])));
+  const flechas = $("#flechas"), flArriba = $("#fl-arriba"), flAbajo = $("#fl-abajo");
+  flechas.hidden = false;
+  flArriba.addEventListener("click", () => { if (!viajando) irAParada(actual() - 1); });
+  flAbajo.addEventListener("click", () => { if (!viajando) irAParada(actual() + 1); });
   document.querySelectorAll('a[href="#cotizar"]').forEach(a => a.addEventListener("click", e => { e.preventDefault(); irAParada(paradas().length - 1); }));
   const textoActivo = y => { // qué texto fijo se ve según el avance
     const M = mesaEl.offsetTop / innerHeight;
@@ -1580,6 +1601,9 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     const escena = prog < 0.67 ? 0 : prog < 4.42 ? 1 : prog < M - 0.4 ? 2 : prog < Bg - 0.5 ? 3 : prog < Q - 0.75 ? 4 : 5;
     ruta.forEach((li, i) => li.classList.toggle("on", i === escena));
     marca.classList.toggle("ver", prog > 0.4);
+    flArriba.hidden = scrollY < 4 || !enViaje(-1);
+    flAbajo.hidden = !enViaje(1);
+    flArriba.disabled = flAbajo.disabled = viajando;
     const ta = textoActivo(prog);
     fijas.forEach((f, i) => f.classList.toggle("activa", i === ta));
 
