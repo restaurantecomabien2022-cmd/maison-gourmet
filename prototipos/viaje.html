@@ -77,7 +77,7 @@ main { position: relative; z-index: 2; }
 .t-cocina { min-height: 170vh; }
 .t-ingred { min-height: 230vh; }
 .t-espiral { min-height: 150vh; }
-.t-plato { min-height: 120vh; padding-block: 12vh; }
+.t-plato { min-height: 120vh; }
 .grande { font-size: clamp(2.6rem, 7.5vw, 6.4rem); }
 .grande em { font-style: italic; color: var(--oro); }
 .texto { max-width: 30rem; color: var(--gris); font-size: 1.05rem; }
@@ -152,12 +152,13 @@ main { position: relative; z-index: 2; }
   .etq:not(.etq--cocina) { letter-spacing: 0.08em; }
 }
 /* Escena 5: cotizador */
-.t-menu { position: relative; z-index: 2; padding-block: 16vh 12vh; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+.t-menu { position: relative; z-index: 2; padding-block: 24vh 12vh; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
 .menu-grid { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; align-items: start; }
 .form-col { display: grid; gap: 28px; min-width: 0; transition: opacity .4s; }
 .form-cabeza { display: grid; gap: 14px; }
-.form-cabeza h2 { font-size: clamp(2.2rem, 4.4vw, 3.6rem); }
-.form-cabeza h2 em { font-style: italic; color: var(--oro); }
+.form-cabeza h1 { font-size: clamp(2.6rem, 5.6vw, 4.6rem); line-height: .98; }
+.form-cabeza h1 em { font-style: italic; color: var(--oro); }
+.form-cabeza .lead { font-size: clamp(1.05rem, 1.5vw, 1.2rem); font-weight: 500; }
 .form-caja { background: rgba(16,23,18,.88); backdrop-filter: blur(10px); border: 1px solid rgba(244,238,226,.12); border-radius: 14px; padding: clamp(20px, 3vw, 34px); scroll-margin-top: 90px; }
 .progreso { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 0 0 28px; padding: 0; list-style: none; }
 .progreso li { display: grid; gap: 6px; font-size: 0.82rem; font-weight: 600; color: var(--gris); }
@@ -294,32 +295,15 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     </div>
   </section>
 
-  <section class="tramo fija t-espiral lado-d">
+  <section class="tramo fija t-espiral">
     <div class="caja sombra rev">
       <p class="eyebrow">Escena 2 · El emplatado</p>
       <h2 class="grande">Y se convierten<br>en <em>tu menú</em></h2>
+      <p class="texto">Cada plato se emplata a mano el día de tu evento, del fogón a tu mesa.</p>
     </div>
   </section>
 
-  <section class="tramo fija t-plato">
-    <div class="caja">
-      <div class="hero sombra rev">
-        <p class="eyebrow">Cocina gourmet · Producción completa</p>
-        <h1>Banquetes y eventos <em>en Bogotá</em></h1>
-        <p class="lead">Cocina gourmet y producción completa en una sola cotización.</p>
-        <div class="acciones">
-          <a class="btn btn--oro" href="#cotizar">Arma tu evento →</a>
-          <a class="btn btn--linea" href="#cotizar">Escríbenos por WhatsApp</a>
-        </div>
-        <ul class="datos">
-          <li>Cocina propia</li>
-          <li>De 20 a 120 invitados</li>
-          <li>Propuesta en menos de 24 h</li>
-        </ul>
-      </div>
-      <div></div>
-    </div>
-  </section>
+  <div class="t-plato" aria-hidden="true"></div>
   <section class="tramo t-mesa" id="mesa" aria-labelledby="h-mesa">
     <div class="pegado">
       <div class="caja">
@@ -358,9 +342,15 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     <div class="menu-grid">
       <div class="form-col">
         <div class="form-cabeza">
-          <p class="eyebrow">Escena 5 · Tu menú</p>
-          <h2 id="h-cotizar">Arma tu menú y <em>cotiza tu evento</em></h2>
-          <p class="texto">Elige cada plato y míralo servido. Te enviamos la propuesta de comida y producción en menos de 24 horas.</p>
+          <p class="eyebrow">Cocina gourmet · Producción completa</p>
+          <h1 id="h-cotizar">Banquetes y eventos <em>en Bogotá</em></h1>
+          <p class="lead">Cocina gourmet y producción completa en una sola cotización.</p>
+          <p class="texto">Arma tu menú, mira cada plato servido y recibe tu propuesta de comida y producción en menos de 24 horas.</p>
+          <ul class="datos">
+            <li>Cocina propia</li>
+            <li>De 20 a 120 invitados</li>
+            <li>Propuesta en menos de 24 h</li>
+          </ul>
         </div>
         <div class="form-caja">
           <ol class="progreso" aria-label="Progreso">
@@ -1348,7 +1338,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 
       // Escena 3: el plato se deshace en polvo dorado y la mesa se arma servicio por servicio
       float k3 = ease((uStage-3.0)*1.3 - aSeed*0.3);
-      float kr = ease((uReveal - floor(aGroup))*1.1 - fract(aSeed*5.3)*0.5);
+      float kr = ease((uReveal - floor(aGroup))*1.6 - fract(aSeed*5.3)*0.6);
       vec3 polvo = vec3((h1-0.5)*34.0, h2*14.0-3.0, (h3-0.5)*16.0) + 0.3*vec3(sin(t*0.4+aSeed*30.0), cos(t*0.3+aSeed*20.0), 0.0);
       vec3 tb = rotY(uTableRot + sin(t*0.12)*0.05) * aTable * uTableScale + uTableOff;
       p = mix(p, mix(polvo, tb, kr), k3);
@@ -1476,16 +1466,17 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
   const fijas = [...document.querySelectorAll(".fija")];
   const paradas = () => {
     const ih = innerHeight, M = mesaEl.offsetTop / ih, Bg = bogEl.offsetTop / ih, Q = cotEl.offsetTop / ih;
-    return [0, 2.0, 3.6, 6.0, M + 3.0, Bg + 2.0, Q + 0.1];
+    const servicio = r => M + 0.5 + r * (2.4 / 5.2); // r = servicios ya armados
+    return [0, 2.0, 3.6, 6.0, servicio(1), servicio(2), servicio(3), servicio(4), servicio(5), Bg + 2.0, Q + 0.1];
   };
-  const PARADA_DE_ESCENA = [0, 1, 3, 4, 5, 6]; // índice de la ruta lateral → parada
+  const PARADA_DE_ESCENA = [0, 1, 3, 4, 9, 10]; // índice de la ruta lateral → parada
   let viajando = false, enfriar = 0;
   const actual = () => { const y = scrollY / innerHeight, p = paradas(); let k = 0; p.forEach((v, i) => { if (Math.abs(v - y) < Math.abs(p[k] - y)) k = i; }); return k; };
   function irAParada(i) {
     const p = paradas(); i = Math.max(0, Math.min(p.length - 1, i));
     const y0 = scrollY, y1 = p[i] * innerHeight, dist = Math.abs(y1 - y0) / innerHeight;
     if (Math.abs(y1 - y0) < 2) return;
-    const dur = reducir ? 300 : Math.min(4800, Math.max(1500, dist * 820));
+    const dur = reducir ? 300 : Math.min(4800, Math.max(1800, dist * 900));
     const t0v = performance.now(); viajando = true;
     const paso = now => {
       const k = Math.min(1, (now - t0v) / dur), e = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
@@ -1524,10 +1515,10 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     e.preventDefault(); gesto(dir);
   });
   document.querySelectorAll(".ruta li").forEach((li, i) => li.addEventListener("click", () => irAParada(PARADA_DE_ESCENA[i])));
-  document.querySelectorAll('a[href="#cotizar"]').forEach(a => a.addEventListener("click", e => { e.preventDefault(); irAParada(6); }));
+  document.querySelectorAll('a[href="#cotizar"]').forEach(a => a.addEventListener("click", e => { e.preventDefault(); irAParada(paradas().length - 1); }));
   const textoActivo = y => { // qué texto fijo se ve según el avance
     const M = mesaEl.offsetTop / innerHeight;
-    return y < 0.7 ? 0 : y < 1.3 ? -1 : y < 2.9 ? 1 : y < 4.4 ? 2 : y < 5.5 ? 3 : y < M - 0.4 ? 4 : -1;
+    return y < 0.7 ? 0 : y < 1.3 ? -1 : y < 2.9 ? 1 : y < 4.4 ? 2 : y < M - 0.4 ? 3 : -1;
   };
   const ruta = [...document.querySelectorAll(".ruta li")];
   const marca = $("#marca");
@@ -1581,7 +1572,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     U.uSpin.value = t * 0.12;
     const rev = seg(prog, M + 0.5, M + 2.9) * 5.2;
     U.uReveal.value = rev;
-    const nOn = servicios.filter((li, i) => rev > i + 0.35).length;
+    const nOn = servicios.filter((li, i) => rev > i + 0.5).length;
     servicios.forEach((li, i) => { li.classList.toggle("on", i < nOn); li.classList.toggle("actual", i === nOn - 1); });
     const kc = seg(prog, M - 0.4, M + 0.6), kce = kc * kc * (3 - 2 * kc);
 
